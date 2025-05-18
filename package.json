@@ -13,7 +13,9 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@ethersproject/contracts": "^5.8.0",
     "dotenv": "^16.5.0",
+    "ethers": "^5.7.2",
     "express": "^5.1.0",
     "ts-node-dev": "^2.0.0"
   },
