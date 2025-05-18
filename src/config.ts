@@ -8,6 +8,10 @@ interface Config {
   pinata: {
     pinataJwt: string;
   };
+  chain: {
+    rpc_url: string;
+  };
+  private_key: string;
 }
 
 const config: Config = {
@@ -16,6 +20,10 @@ const config: Config = {
   pinata: {
     pinataJwt: process.env.PINATA_JWT || "",
   },
+  chain: {
+    rpc_url: process.env.RPC_URL || "",
+  },
+  private_key: process.env.PRIVATE_KEY || "",
 };
 
 export default config;
