@@ -122,6 +122,32 @@ export class IPFSService {
       throw new Error(`createTokenURI failed: ${err.message}`);
     }
   }
+
+  /**
+   * Reads data from an IPFS URL using the public gateway
+   */
+  async readFromIPFS(ipfsUrl: string): Promise<any> {
+    try {
+      // Convert ipfs:// URL to public gateway URL
+      const gatewayUrl = ipfsUrl.replace("ipfs://", "https://ipfs.io/ipfs/");
+
+      const response = await fetch(gatewayUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      // Check if it's JSON or binary data
+      const contentType = response.headers.get("content-type");
+      if (contentType?.includes("application/json")) {
+        return await response.json();
+      } else {
+        // For binary data (like images), return the buffer
+        return await response.arrayBuffer();
+      }
+    } catch (err: any) {
+      throw new Error(`readFromIPFS(${ipfsUrl}) failed: ${err.message}`);
+    }
+  }
 }
 
 // TEST
@@ -138,15 +164,28 @@ async function testIPFS() {
     // Then create token URI with the uploaded image
     const metadata: TokenMetadata = {
       name: "NANIFUN",
-      symbol: "NANIFUN",
+      symbol: "NNF",
       description: "NANIFUN Token",
       image: imageUri,
     };
 
     const tokenURI = await ipfsService.createTokenURI(metadata);
     console.log("Token URI created:", tokenURI);
+
+    // Verify the uploaded data
+    console.log("\nVerifying uploaded data...");
+
+    // Read and verify metadata
+    console.log("\nReading metadata from IPFS...");
+    const metadataData = await ipfsService.readFromIPFS(tokenURI);
+    console.log("Metadata content:", JSON.stringify(metadataData, null, 2));
+
+    // Read and verify image
+    console.log("\nReading image from IPFS...");
+    const imageData = await ipfsService.readFromIPFS(imageUri);
+    console.log("Image size:", imageData.byteLength, "bytes");
   } catch (error) {
-    console.error("Failed to create token URI:", error);
+    console.error("Failed to create or verify token URI:", error);
   }
 }
 
