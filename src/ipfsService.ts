@@ -1,6 +1,5 @@
-import { createReadStream } from "fs";
-import type { IPFSHTTPClient } from "ipfs-http-client";
-import { create } from "ipfs-http-client";
+import FormData from "form-data";
+import * as fs from "fs";
 import fetch from "node-fetch";
 import path from "path";
 import config from "./config";
@@ -13,34 +12,41 @@ export interface TokenMetadata {
 }
 
 export class IPFSService {
-  private ipfs: IPFSHTTPClient;
+  private readonly pinataJwt: string;
 
   constructor() {
-    const { projectId, projectSecret } = config.infura;
-    if (!projectId || !projectSecret) {
-      throw new Error("Infura IPFS credentials are missing in config.infura");
+    const { pinataJwt } = config.pinata;
+    if (!pinataJwt) {
+      throw new Error("Pinata JWT is missing in config.pinata");
     }
-
-    const auth =
-      "Basic " +
-      Buffer.from(`${projectId}:${projectSecret}`).toString("base64");
-
-    this.ipfs = create({
-      host: "ipfs.infura.io",
-      port: 5001,
-      protocol: "https",
-      headers: { authorization: auth },
-    });
+    this.pinataJwt = pinataJwt;
   }
 
   /**
-   * Uploads a local file to IPFS via Infura and returns an ipfs:// CID URI.
+   * Uploads a local file to IPFS via Pinata and returns an ipfs:// CID URI.
    */
   async uploadImageFromFile(filePath: string): Promise<string> {
     try {
-      const stream = createReadStream(filePath);
-      const { cid } = await this.ipfs.add(stream);
-      return `ipfs://${cid.toString()}`;
+      const formData = new FormData();
+      formData.append("file", fs.createReadStream(filePath));
+
+      const response = await fetch(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.pinataJwt}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return `ipfs://${data.IpfsHash}`;
     } catch (err: any) {
       throw new Error(
         `uploadImageFromFile(${filePath}) failed: ${err.message}`
@@ -49,7 +55,7 @@ export class IPFSService {
   }
 
   /**
-   * Fetches an image from a URL and uploads it to IPFS, returning an ipfs:// URI.
+   * Fetches an image from a URL and uploads it to IPFS via Pinata, returning an ipfs:// URI.
    */
   async uploadImageFromUrl(imageUrl: string): Promise<string> {
     try {
@@ -57,29 +63,68 @@ export class IPFSService {
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
       }
+
       const buffer = await response.arrayBuffer();
-      const { cid } = await this.ipfs.add(Buffer.from(buffer));
-      return `ipfs://${cid.toString()}`;
+      const formData = new FormData();
+      formData.append("file", Buffer.from(buffer), {
+        filename: "image.jpg",
+        contentType: "image/jpeg",
+      });
+
+      const uploadResponse = await fetch(
+        "https://api.pinata.cloud/pinning/pinFileToIPFS",
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${this.pinataJwt}`,
+          },
+          body: formData,
+        }
+      );
+
+      if (!uploadResponse.ok) {
+        throw new Error(
+          `HTTP ${uploadResponse.status}: ${uploadResponse.statusText}`
+        );
+      }
+
+      const data = await uploadResponse.json();
+      return `ipfs://${data.IpfsHash}`;
     } catch (err: any) {
       throw new Error(`uploadImageFromUrl(${imageUrl}) failed: ${err.message}`);
     }
   }
 
   /**
-   * Packs TokenMetadata as JSON, uploads to IPFS, and returns the ipfs:// CID URI.
+   * Packs TokenMetadata as JSON, uploads to IPFS via Pinata, and returns the ipfs:// CID URI.
    */
   async createTokenURI(metadata: TokenMetadata): Promise<string> {
     try {
-      const buf = Buffer.from(JSON.stringify(metadata));
-      const { cid } = await this.ipfs.add(buf);
-      return `ipfs://${cid.toString()}`;
+      const response = await fetch(
+        "https://api.pinata.cloud/pinning/pinJSONToIPFS",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.pinataJwt}`,
+          },
+          body: JSON.stringify(metadata),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return `ipfs://${data.IpfsHash}`;
     } catch (err: any) {
       throw new Error(`createTokenURI failed: ${err.message}`);
     }
   }
 }
 
-// Simple test
+// TEST
 async function testIPFS() {
   const ipfsService = new IPFSService();
 
