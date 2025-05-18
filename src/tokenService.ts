@@ -33,7 +33,6 @@ export class CoinChanClient {
     owner: string;
     ethAmount: BigNumberish;
   }): Promise<TokenCreationResult> {
-    // 1) Simulate để lấy các return values
     const [coinId, amount0, amount1, liquidity] =
       await this.contract.callStatic.make(
         params.name,
@@ -46,7 +45,6 @@ export class CoinChanClient {
         { value: params.ethAmount }
       );
 
-    // 2) Gửi transaction thật
     const tx = await this.contract.make(
       params.name,
       params.symbol,
