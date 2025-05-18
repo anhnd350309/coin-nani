@@ -5,6 +5,9 @@ dotenv.config();
 interface Config {
   port: number;
   nodeEnv: string;
+  pinata: {
+    pinataJwt: string;
+  };
   chain: {
     rpc_url: string;
   };
@@ -14,6 +17,9 @@ interface Config {
 const config: Config = {
   port: Number(process.env.PORT) || 3000,
   nodeEnv: process.env.NODE_ENV || "development",
+  pinata: {
+    pinataJwt: process.env.PINATA_JWT || "",
+  },
   chain: {
     rpc_url: process.env.RPC_URL || "",
   },
