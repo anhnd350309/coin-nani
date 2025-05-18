@@ -26,6 +26,9 @@ importers:
       express:
         specifier: ^5.1.0
         version: 5.1.0
+      form-data:
+        specifier: ^4.0.2
+        version: 4.0.2
       ipfs-http-client:
         specifier: 56.0.3
         version: 56.0.3(encoding@0.1.13)(node-fetch@2.6.7(encoding@0.1.13))
