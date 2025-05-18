@@ -13,6 +13,7 @@ export interface TokenCreationResult {
   amount0: string;
   amount1: string;
   liquidity: string;
+  tokenAddress: string;
   receipt: ethers.ContractReceipt;
 }
 
@@ -57,11 +58,17 @@ export class CoinChanClient {
     );
     const receipt = await tx.wait();
 
+    const coinIdBN = ethers.BigNumber.from(coinId);
+    const tokenAddress = ethers.utils.getAddress(
+      ethers.utils.hexZeroPad(coinIdBN.toHexString(), 20)
+    );
+
     return {
       coinId: coinId.toString(),
       amount0: amount0.toString(),
       amount1: amount1.toString(),
       liquidity: liquidity.toString(),
+      tokenAddress,
       receipt,
     };
   }
@@ -106,11 +113,17 @@ export class CoinChanClient {
     );
     const receipt = await tx.wait();
 
+    const coinIdBN = ethers.BigNumber.from(coinId);
+    const tokenAddress = ethers.utils.getAddress(
+      ethers.utils.hexZeroPad(coinIdBN.toHexString(), 20)
+    );
+
     return {
       coinId: coinId.toString(),
       amount0: amount0.toString(),
       amount1: amount1.toString(),
       liquidity: liquidity.toString(),
+      tokenAddress,
       receipt,
     };
   }
@@ -149,11 +162,17 @@ export class CoinChanClient {
     );
     const receipt = await tx.wait();
 
+    const coinIdBN = ethers.BigNumber.from(coinId);
+    const tokenAddress = ethers.utils.getAddress(
+      ethers.utils.hexZeroPad(coinIdBN.toHexString(), 20)
+    );
+
     return {
       coinId: coinId.toString(),
       amount0: amount0.toString(),
       amount1: amount1.toString(),
       liquidity: liquidity.toString(),
+      tokenAddress,
       receipt,
     };
   }
@@ -167,7 +186,7 @@ export const client = new CoinChanClient(signer);
 
 async function testMake() {
   const result = await client.createToken({
-    name: "NANIFUN",
+    name: "NANIFUUUUNNNNN",
     symbol: "NANIFUN",
     tokenURI: "https://nanifun.com",
     poolSupply: 1000000000000000000n,
@@ -212,6 +231,6 @@ async function testMakeHold() {
   console.log(result);
 }
 
-// testMake();
+testMake();
 // testMakeLock();
 // testMakeHold();
