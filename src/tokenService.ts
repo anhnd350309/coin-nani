@@ -186,7 +186,7 @@ export const client = new CoinChanClient(signer);
 
 async function testMake() {
   const result = await client.createToken({
-    name: "NANIFUUUUNNNNN",
+    name: "NANIFUUUUNNNNNNNN",
     symbol: "NANIFUN",
     tokenURI: "https://nanifun.com",
     poolSupply: 1000000000000000000n,

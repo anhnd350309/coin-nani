@@ -211,4 +211,4 @@ async function testIPFS() {
 }
 
 // Run test
-testIPFS();
+// testIPFS();
