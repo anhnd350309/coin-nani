@@ -12,6 +12,9 @@ interface Config {
     rpc_url: string;
   };
   private_key: string;
+  db: {
+    uri: string;
+  };
 }
 
 const config: Config = {
@@ -24,6 +27,9 @@ const config: Config = {
     rpc_url: process.env.RPC_URL || "",
   },
   private_key: process.env.PRIVATE_KEY || "",
+  db: {
+    uri: process.env.DB_URI || "",
+  },
 };
 
 export default config;

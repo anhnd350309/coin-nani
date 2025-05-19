@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { ipfsService, IPFSService } from "../services/ipfsService";
 import { coinChainClient, signer } from "../services/tokenService";
 import { ethers } from "ethers";
+import { insertToken } from "./dbquery";
 
 interface LaunchTokenRequest {
   name: string;
@@ -24,6 +25,12 @@ export const launchToken = async (req: Request, res: Response) => {
       website,
       image_url,
     }: LaunchTokenRequest = req.body;
+
+    // res.status(201).json({
+    //   success: true,
+    //   message: "Token launched successfully",
+    //   token_address: "0xC39491284EE1d099A53e62098759282794ED9918",
+    // });
 
     // Validate only required fields (name, symbol, image_url)
     if (!name || !symbol) {
@@ -69,11 +76,19 @@ export const launchToken = async (req: Request, res: Response) => {
     });
 
     console.log("Token launched successfully:", inforToken);
+    await insertToken({
+      name,
+      symbol,
+      description,
+      token_address: inforToken.coinId,
+      image_url:
+        ipfsUrl ?? "ipfs://QmbHoD9UJ1L2xfv5oFvhANsWzf1tMzN2Lr8YrPDACXt1aE",
+    });
 
     res.status(201).json({
       success: true,
       message: "Token launched successfully",
-      token_address: inforToken.coinId,
+      token_address: inforToken.tokenAddress,
     });
   } catch (error) {
     console.error("Error launching token:", error);
