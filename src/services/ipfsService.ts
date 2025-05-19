@@ -106,6 +106,10 @@ export class IPFSService {
    */
   async createTokenURI(metadata: TokenMetadata): Promise<string> {
     try {
+      if (!metadata.image) {
+        metadata.image =
+          "ipfs://QmbHoD9UJ1L2xfv5oFvhANsWzf1tMzN2Lr8YrPDACXt1aE";
+      }
       const response = await fetch(
         "https://api.pinata.cloud/pinning/pinJSONToIPFS",
         {
@@ -213,5 +217,21 @@ async function testIPFS() {
   }
 }
 
+const verifyIpfs = async () => {
+  console.log("\n=== Verifying uploaded data ===");
+  // const tokenURI = "ipfs://QmZ7je9W5rNGyM17ZJwdnva9rCeWAPyKDVZ2zCAYnt6M9D";
+  const tokenURI = "ipfs://QmbHoD9UJ1L2xfv5oFvhANsWzf1tMzN2Lr8YrPDACXt1aE";
+
+  // Read and verify metadata
+  console.log("\nReading metadata from IPFS...");
+  const metadataData = await ipfsService.readFromIPFS(tokenURI);
+  console.log("Metadata content:", JSON.stringify(metadataData, null, 2));
+
+  // // Read and verify URL image
+  // console.log("\nReading URL image from IPFS...");
+  // const urlImageData = await ipfsService.readFromIPFS(urlImageUri);
+  // console.log("URL image size:", urlImageData.byteLength, "bytes");
+};
+// verifyIpfs();
 // Run test
 // testIPFS();

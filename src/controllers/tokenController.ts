@@ -49,10 +49,16 @@ export const launchToken = async (req: Request, res: Response) => {
     };
 
     const ipfsUrl = await ipfsService.uploadImageFromUrl(image_url);
+    const metadataUrl = await ipfsService.createTokenURI({
+      name,
+      symbol,
+      description: description || "New token nani coin",
+      image: ipfsUrl,
+    });
     const inforToken = await coinChainClient.createToken({
       name,
       symbol,
-      tokenURI: ipfsUrl,
+      tokenURI: metadataUrl,
       poolSupply: 21000000000000000000000000n,
       ownerSupply: 0n,
       swapFee: 0,
