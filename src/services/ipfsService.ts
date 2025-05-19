@@ -3,7 +3,7 @@ import FormData from "form-data";
 import * as fs from "fs";
 import fetch from "node-fetch";
 import path from "path";
-import config from "./config";
+import config from "../config";
 
 export interface TokenMetadata {
   name: string;
@@ -156,6 +156,8 @@ export class IPFSService {
   }
 }
 
+export const ipfsService = new IPFSService();
+
 // TEST
 async function testIPFS() {
   const ipfsService = new IPFSService();
@@ -187,6 +189,7 @@ async function testIPFS() {
 
     const tokenURI = await ipfsService.createTokenURI(metadata);
     console.log("Token URI created:", tokenURI);
+    return tokenURI;
 
     // Verify the uploaded data
     console.log("\n=== Verifying uploaded data ===");

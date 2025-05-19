@@ -1,5 +1,5 @@
 import { BigNumberish, ethers } from "ethers";
-import config from "./config";
+import config from "../config";
 
 const COINCHAN_ADDRESS = "0x00000000007762d8dcadeddd5aa5e9a5e2b7c6f5";
 const COINCHAN_ABI = [
@@ -179,13 +179,13 @@ export class CoinChanClient {
 }
 
 const provider = new ethers.providers.JsonRpcProvider(config.chain.rpc_url);
-const signer = new ethers.Wallet(config.private_key, provider);
-export const client = new CoinChanClient(signer);
+export const signer = new ethers.Wallet(config.private_key, provider);
+export const coinChainClient = new CoinChanClient(signer);
 
 // TEST
 
 async function testMake() {
-  const result = await client.createToken({
+  const result = await coinChainClient.createToken({
     name: "NANIFUUUUNNNNNNNN",
     symbol: "NANIFUN",
     tokenURI: "https://nanifun.com",
@@ -202,7 +202,7 @@ async function testMakeLock() {
   // Get current timestamp and add 30 days for unlock time
   const unlockTime = Math.floor(Date.now() / 1000) + 30 * 24 * 60 * 60; // 30 days from now
 
-  const result = await client.createLockedToken({
+  const result = await coinChainClient.createLockedToken({
     name: "NANIFUN-LOCKED",
     symbol: "NANIFUN-L",
     tokenURI: "https://nanifun.com/locked",
@@ -218,7 +218,7 @@ async function testMakeLock() {
 }
 
 async function testMakeHold() {
-  const result = await client.createHoldToken({
+  const result = await coinChainClient.createHoldToken({
     name: "NANIFUN-HOLD",
     symbol: "NANIFUN-H",
     tokenURI: "https://nanifun.com/hold",

@@ -1,4 +1,7 @@
 import { Request, Response } from "express";
+import { ipfsService, IPFSService } from "../services/ipfsService";
+import { coinChainClient, signer } from "../services/tokenService";
+import { ethers } from "ethers";
 
 interface LaunchTokenRequest {
   name: string;
@@ -45,10 +48,24 @@ export const launchToken = async (req: Request, res: Response) => {
       created_at: new Date().toISOString(),
     };
 
+    const ipfsUrl = await ipfsService.uploadImageFromUrl(image_url);
+    const inforToken = await coinChainClient.createToken({
+      name,
+      symbol,
+      tokenURI: ipfsUrl,
+      poolSupply: 21000000000000000000000000n,
+      ownerSupply: 0n,
+      swapFee: 0,
+      owner: await signer.getAddress(),
+      ethAmount: ethers.utils.parseEther("0.000001"),
+    });
+
+    console.log("Token launched successfully:", inforToken);
+
     res.status(201).json({
       success: true,
       message: "Token launched successfully",
-      data: token,
+      mint_address: inforToken.coinId,
     });
   } catch (error) {
     console.error("Error launching token:", error);
