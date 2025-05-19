@@ -3,6 +3,7 @@ import { ipfsService, IPFSService } from "../services/ipfsService";
 import { coinChainClient, signer } from "../services/tokenService";
 import { ethers } from "ethers";
 import { insertToken } from "./dbquery";
+import config from "../config";
 
 interface LaunchTokenRequest {
   name: string;
@@ -26,11 +27,15 @@ export const launchToken = async (req: Request, res: Response) => {
       image_url,
     }: LaunchTokenRequest = req.body;
 
-    // res.status(201).json({
-    //   success: true,
-    //   message: "Token launched successfully",
-    //   token_address: "0xC39491284EE1d099A53e62098759282794ED9918",
-    // });
+    console.log("Request body:", req.body);
+    if (config.nodeEnv === "development") {
+      res.status(201).json({
+        success: true,
+        message: "Token launched successfully",
+        token_address: "0xC39491284EE1d099A53e62098759282794ED9918",
+      });
+      return;
+    }
 
     // Validate only required fields (name, symbol, image_url)
     if (!name || !symbol) {
@@ -42,21 +47,10 @@ export const launchToken = async (req: Request, res: Response) => {
 
     // Here you would implement the actual token launching logic
 
-    // Mock response for now
-    const token = {
-      id: Date.now().toString(),
-      name,
-      symbol,
-      image_url,
-      description: description || null,
-      twitter: twitter || null,
-      telegram: telegram || null,
-      website: website || null,
-      created_at: new Date().toISOString(),
-    };
     let ipfsUrl = undefined;
     if (image_url) {
       ipfsUrl = await ipfsService.uploadImageFromUrl(image_url);
+      console.log("IPFS URL:", ipfsUrl);
     }
     const metadataUrl = await ipfsService.createTokenURI({
       name,
@@ -64,6 +58,8 @@ export const launchToken = async (req: Request, res: Response) => {
       description: description || "New token nani coin",
       image: ipfsUrl,
     });
+
+    console.log("Metadata URL:", metadataUrl);
     const inforToken = await coinChainClient.createToken({
       name,
       symbol,
