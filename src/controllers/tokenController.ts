@@ -26,10 +26,10 @@ export const launchToken = async (req: Request, res: Response) => {
     }: LaunchTokenRequest = req.body;
 
     // Validate only required fields (name, symbol, image_url)
-    if (!name || !symbol || !image_url) {
+    if (!name || !symbol) {
       res.status(400).json({
         success: false,
-        error: "Name, symbol, and image_url are required",
+        error: "Name, symbol are required",
       });
     }
 
@@ -47,8 +47,10 @@ export const launchToken = async (req: Request, res: Response) => {
       website: website || null,
       created_at: new Date().toISOString(),
     };
-
-    const ipfsUrl = await ipfsService.uploadImageFromUrl(image_url);
+    let ipfsUrl = undefined;
+    if (image_url) {
+      ipfsUrl = await ipfsService.uploadImageFromUrl(image_url);
+    }
     const metadataUrl = await ipfsService.createTokenURI({
       name,
       symbol,
@@ -71,7 +73,7 @@ export const launchToken = async (req: Request, res: Response) => {
     res.status(201).json({
       success: true,
       message: "Token launched successfully",
-      mint_address: inforToken.coinId,
+      token_address: inforToken.coinId,
     });
   } catch (error) {
     console.error("Error launching token:", error);
