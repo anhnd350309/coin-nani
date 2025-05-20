@@ -76,7 +76,7 @@ export const launchToken = async (req: Request, res: Response) => {
       name,
       symbol,
       description,
-      token_address: inforToken.coinId,
+      token_address: inforToken.tokenAddress,
       image_url:
         ipfsUrl ?? "ipfs://QmbHoD9UJ1L2xfv5oFvhANsWzf1tMzN2Lr8YrPDACXt1aE",
     });
